@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>자동차 기관 작동 원리 게임</title>
+<style>
+  body {
+    font-family: 'Arial', sans-serif;
+    background: #f0f8ff;
+    margin: 0; padding: 20px;
+    display: flex; flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+  }
+  h1 {
+    color: #333;
+  }
+  .buttons {
+    margin: 20px 0;
+  }
+  button {
+    background: #3498db;
+    border: none;
+    color: white;
+    padding: 12px 20px;
+    margin: 0 10px;
+    font-size: 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+  button:hover {
+    background: #2980b9;
+  }
+  #animationCanvas {
+    border: 2px solid #333;
+    background: #fff;
+    border-radius: 10px;
+  }
+  #description {
+    max-width: 600px;
+    margin-top: 20px;
+    font-size: 16px;
+    color: #555;
+    line-height: 1.4;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+  <h1>자동차 기관 작동 원리 게임</h1>
+  <div class="buttons">
+    <button id="btnGasoline">가솔린 기관 보기</button>
+    <button id="btnDiesel">디젤 기관 보기</button>
+  </div>
+  <canvas id="animationCanvas" width="600" height="300"></canvas>
+  <div id="description"></div>
+
+<script>
+const canvas = document.getElementById('animationCanvas');
+const ctx = canvas.getContext('2d');
+const desc = document.getElementById('description');
+
+let animationId;
+let frame = 0;
+
+const width = canvas.width;
+const height = canvas.height;
+
+// 기본 파라미터
+const piston = {
+  x: width/2 - 50,
+  y: 250,
+  width: 100,
+  height: 60,
+  posY: 250,
+  direction: -1,
+};
+
+const cylinderTopY = 80;
+const cylinderBottomY = 310;
+
+function drawCylinder() {
+  ctx.fillStyle = '#bbb';
+  ctx.fillRect(piston.x - 20, cylinderTopY, piston.width + 40, cylinderBottomY - cylinderTopY);
+  // 실린더 구분선
+  ctx.strokeStyle = '#666';
+  ctx.lineWidth = 3;
+  ctx.strokeRect(piston.x - 20, cylinderTopY, piston.width + 40, cylinderBottomY - cylinderTopY);
+}
+
+function drawPiston(y) {
+  ctx.fillStyle = '#e74c3c';
+  ctx.fillRect(piston.x, y, piston.width, piston.height);
+  // 피스톤 헤드
+  ctx.fillStyle = '#c0392b';
+  ctx.fillRect(piston.x, y, piston.width, 10);
+}
+
+function drawValve(x, y, isOpen) {
+  ctx.fillStyle = isOpen ? '#27ae60' : '#7f
