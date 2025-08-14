@@ -13,12 +13,8 @@
     align-items: center;
     min-height: 100vh;
   }
-  h1 {
-    color: #333;
-  }
-  .buttons {
-    margin: 20px 0;
-  }
+  h1 { color: #333; }
+  .buttons { margin: 20px 0; }
   button {
     background: #3498db;
     border: none;
@@ -30,9 +26,7 @@
     cursor: pointer;
     transition: background 0.3s;
   }
-  button:hover {
-    background: #2980b9;
-  }
+  button:hover { background: #2980b9; }
   #animationCanvas {
     border: 2px solid #333;
     background: #fff;
@@ -64,11 +58,11 @@ const desc = document.getElementById('description');
 
 let animationId;
 let frame = 0;
+let mode = null; // 'gasoline' or 'diesel'
 
 const width = canvas.width;
 const height = canvas.height;
 
-// 기본 파라미터
 const piston = {
   x: width/2 - 50,
   y: 250,
@@ -84,7 +78,6 @@ const cylinderBottomY = 310;
 function drawCylinder() {
   ctx.fillStyle = '#bbb';
   ctx.fillRect(piston.x - 20, cylinderTopY, piston.width + 40, cylinderBottomY - cylinderTopY);
-  // 실린더 구분선
   ctx.strokeStyle = '#666';
   ctx.lineWidth = 3;
   ctx.strokeRect(piston.x - 20, cylinderTopY, piston.width + 40, cylinderBottomY - cylinderTopY);
@@ -93,10 +86,88 @@ function drawCylinder() {
 function drawPiston(y) {
   ctx.fillStyle = '#e74c3c';
   ctx.fillRect(piston.x, y, piston.width, piston.height);
-  // 피스톤 헤드
   ctx.fillStyle = '#c0392b';
   ctx.fillRect(piston.x, y, piston.width, 10);
 }
 
 function drawValve(x, y, isOpen) {
-  ctx.fillStyle = isOpen ? '#27ae60' : '#7f
+  ctx.fillStyle = isOpen ? '#27ae60' : '#7f8c8d';
+  ctx.beginPath();
+  ctx.arc(x, y, 10, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+function drawSparkPlug() {
+  ctx.fillStyle = '#f1c40f';
+  ctx.fillRect(piston.x + piston.width/2 - 5, cylinderTopY - 25, 10, 20);
+}
+
+function drawFuelInjector() {
+  ctx.fillStyle = '#8e44ad';
+  ctx.fillRect(piston.x + piston.width/2 - 5, cylinderTopY - 25, 10, 20);
+}
+
+function animate() {
+  ctx.clearRect(0, 0, width, height);
+  drawCylinder();
+
+  let cycle = frame % 200;
+  let stage = Math.floor(cycle / 50); // 0~3단계
+
+  // 피스톤 움직임
+  if (stage === 0 || stage === 2) { // 하강
+    piston.posY = 150 + (cycle % 50) * 2;
+  } else { // 상승
+    piston.posY = 250 - (cycle % 50) * 2;
+  }
+  drawPiston(piston.posY);
+
+  // 밸브 상태
+  let intakeOpen = (stage === 0);
+  let exhaustOpen = (stage === 3);
+  drawValve(piston.x - 30, cylinderTopY + 20, intakeOpen); // 흡기밸브
+  drawValve(piston.x + piston.width + 30, cylinderTopY + 20, exhaustOpen); // 배기밸브
+
+  // 연소 시각화
+  if (stage === 2) {
+    if (mode === 'gasoline') drawSparkPlug();
+    else drawFuelInjector();
+    ctx.fillStyle = 'orange';
+    ctx.beginPath();
+    ctx.arc(width/2, piston.posY - 30, 30, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // 설명
+  const stagesText = [
+    "흡입행정: 흡기밸브 열림, 공기(가솔린은 연료 혼합) 흡입",
+    mode === 'gasoline'
+      ? "압축행정: 혼합기 압축"
+      : "압축행정: 공기만 압축 (고온·고압 상태)",
+    mode === 'gasoline'
+      ? "폭발행정: 점화플러그 점화 → 폭발"
+      : "폭발행정: 연료 분사 → 폭발",
+    "배기행정: 배기밸브 열림, 배기가스 배출"
+  ];
+  desc.textContent = stagesText[stage];
+
+  frame++;
+  animationId = requestAnimationFrame(animate);
+}
+
+document.getElementById('btnGasoline').addEventListener('click', () => {
+  cancelAnimationFrame(animationId);
+  mode = 'gasoline';
+  frame = 0;
+  animate();
+});
+
+document.getElementById('btnDiesel').addEventListener('click', () => {
+  cancelAnimationFrame(animationId);
+  mode = 'diesel';
+  frame = 0;
+  animate();
+});
+</script>
+</body>
+</html>
